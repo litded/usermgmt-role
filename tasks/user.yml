@@ -1,0 +1,23 @@
+---
+- block:
+  - name: create, update or delete user
+    user:
+      name: '{{ item.name }}'
+      state: '{{ item.state|default("present") }}'
+      # remove: '{% if item.state|default("present") == "absent" %}yes{% else %}no{% endif %}'
+      # force: '{% if item.state|default("present") == "absent" %}yes{% else %}no{% endif %}'
+      # ^ value yes should affects only 'state: absent', but paranoia is real
+      shell: '/bin/bash'
+      group: 'sudo'
+      password: ''
+
+  - name: set authorized key
+    authorized_key:
+      user: '{{ item.name }}'
+      state: present
+      exclusive: no
+      key: '{{ item.key }}'
+    ignore_errors: yes
+    when: item.key is defined and item.state|default("present") == "present"
+
+  when: inventory_hostname in item.servers or "all" in item.servers

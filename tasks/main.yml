@@ -1,0 +1,16 @@
+---
+# tasks file for usermgmt-role
+- name: create sudo group
+  group:
+    name: sudo
+    state: present
+
+- name: no-password sudoers config via file
+  copy:
+    content: |
+      %sudo  ALL=(ALL) NOPASSWD: ALL
+    dest: /etc/sudoers.d/sudo
+
+- name: create users per servers
+  include_tasks: user.yml
+  with_items: "{{ users }}"
